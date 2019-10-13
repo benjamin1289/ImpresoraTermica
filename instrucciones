@@ -1,0 +1,6 @@
+// Descomentar la extension en php.ini
+
+extension=php_intl.dll
+
+Seguir las instrucciones
+https://github.com/mike42/escpos-php
