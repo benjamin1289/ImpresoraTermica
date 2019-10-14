@@ -14,6 +14,43 @@ use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 
 class printerController extends Controller{
  
+    public function prepareticket(Request $request){
+        $datos = $request->all();
+        $printerName = 'LR2000';
+        try {
+            $connector = new WindowsPrintConnector($printerName);
+            $printer = new Printer($connector);
+            $count = count($datos);
+            for ($i=0; $i < $count; $i++) {
+                $row = json_decode( $datos[$i] );
+                if($row->text == "-1"){
+                    $printer -> feed(1);;
+                }else{
+                    if( $row->align == 0 ){//JUSTIFY_LEFT
+                        $printer->setJustification(Printer::JUSTIFY_LEFT);
+                    }else if( $row->align == 1){//JUSTIFY_CENTER
+                        $printer->setJustification(Printer::JUSTIFY_CENTER);
+                    }else{//JUSTIFY_RIGHT
+                        $printer->setJustification(Printer::JUSTIFY_RIGHT);
+                    }
+                    $printer -> text($row->text."\n");    
+                }
+            }
+            $printer -> cut();
+            $printer -> close();
+            $data = ['status'  =>200,
+                 'message' => "Success",
+                 'data'    => []
+             ];
+
+            return $this->respond("Impresion Correcta", []);
+        } catch(Exception $e) {
+            return $this->respondInternalError("Impresion Correcta", $e);
+        }
+
+
+    }
+
     public function ticket(Request $request){
         $datos = $request->all();
         $printerName = 'LR2000';
@@ -23,11 +60,11 @@ class printerController extends Controller{
             $count = count($datos);
             for ($i=0; $i < $count; $i++) {
                 $row = $datos[$i];
-                $tmp = $row;
+                $tmp = trim($row);;
                 if(trim($tmp)==""){
                     $printer -> feed(1);;
                 }else{
-                    //echo $count."\t init:\t".$row[0]."\t left:\t".$row[ strlen( $row ) -1]."\n";
+                    //echo $row."\t start: ".$row[0]."\t left: ".$row[ strlen( $row ) -1]."\n";
                     if( $row[0] == " " && $row[ strlen( $row ) -1] == " "){//JUSTIFY_CENTER
                         $printer->setJustification(Printer::JUSTIFY_CENTER);
                     }else if( $row[0] != " " && $row[ strlen($row ) -1] == " "){//JUSTIFY_LEFT
@@ -65,14 +102,14 @@ class printerController extends Controller{
                         "           World!Hello World!Hello World!"
                     ];
             $count = count($datos);
-            print_r($datos);
+            //print_r($datos);
             for ($i=0; $i < $count; $i++) {
                 $row = $datos[$i];
-
-                if(trim($row)==""){
+                $space = trim($row);
+                if($space==""){
                     $printer -> feed(1);;
                 }else{
-                    echo $count."\t init:\t".$row[0]."\t left:\t".$row[ strlen( $row ) -1]."\n";
+                    //echo $count."\t init:\t".$row[0]."\t left:\t".$row[ strlen( $row ) -1]."\n";
                     if( $row[0] == " " && $row[ strlen( $row ) -1] == " "){//JUSTIFY_CENTER
                         $printer->setJustification(Printer::JUSTIFY_CENTER);
                     }else if( $row[0] != " " && $row[ strlen($row ) -1] == " "){//JUSTIFY_LEFT

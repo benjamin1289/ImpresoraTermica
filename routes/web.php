@@ -19,6 +19,8 @@ Route::group(['prefix' => 'print'], function(){
     
     Route::get('/test', 'printerController@printertest');
 
-	Route::get('/ticket', 'printerController@ticket');
+	Route::get('/ticket', 'printerController@prepareticket');
+	
+	//Route::get('/ticket', 'printerController@ticket');
 
 });
