@@ -15,12 +15,18 @@ Route::get('/', function () {
     return 'API';//view('welcome');
 });
 
+Route::get('/api', function () {
+    return '    Impresora';//view('welcome');
+});
+
 Route::group(['prefix' => 'print'], function(){
     
     Route::get('/test', 'printerController@printertest');
 
-	Route::get('/ticket', 'printerController@prepareticket');
+	Route::get('/ticket', 'printerController@imprimeticket');
 	
-	//Route::get('/ticket', 'printerController@ticket');
+    Route::get('/testip', 'printerController@printertestip');
+    
+    Route::get('/ticketip', 'printerController@imprimeticketip');
 
 });

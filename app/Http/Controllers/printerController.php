@@ -14,7 +14,7 @@ use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 
 class printerController extends Controller{
  
-    public function prepareticket(Request $request){
+    public function imprimeticket(Request $request){
         $datos = $request->all();
         $printerName = 'LR2000';
         try {
@@ -97,12 +97,11 @@ class printerController extends Controller{
             $connector = new WindowsPrintConnector($printerName);
             $printer = new Printer($connector);
             $datos = [
-                        "    5678901234567890123456789001234567    ",
-                        "Hello World!Hello World!H                ",
-                        "           World!Hello World!Hello World!"
+                        "    Centrado    ",
+                        "Izquierda                ",
+                        "           Derecha"
                     ];
             $count = count($datos);
-            //print_r($datos);
             for ($i=0; $i < $count; $i++) {
                 $row = $datos[$i];
                 $space = trim($row);
@@ -120,14 +119,6 @@ class printerController extends Controller{
                     $printer -> text($row."\n");    
                 }
             }
-            /*$printer->setJustification(Printer::JUSTIFY_CENTER);//(Printer::JUSTIFY_CENTER);
-            //$printer -> text("123456789012345678901234567890012345678901\n"); //41
-            $printer -> text("\n"); //41
-            $printer->setJustification(Printer::JUSTIFY_LEFT);//(Printer::JUSTIFY_CENTER);
-            $printer -> text("\n");
-            $printer->setJustification(Printer::JUSTIFY_RIGHT);//(Printer::JUSTIFY_CENTER);
-            $printer -> text("\n");
-            */
             $printer -> cut();
 
             $printer -> close();
@@ -143,7 +134,89 @@ class printerController extends Controller{
     }
 
 
+    public function printertestip(){
+        //$computerName = gethostname();
+        $printerip = '192.168.0.190';
+        try {
+            $connector = new NetworkPrintConnector($printerip, 9100);
+            $printer = new Printer($connector);
+            $datos = [
+                        "                  Center                  ",
+                        "Alineacion a la izquierda                ",
+                        "                  Alineacion a la derecha"
+                    ];
+            $count = count($datos);
+            for ($i=0; $i < $count; $i++) {
+                $row = $datos[$i];
 
+                if(trim($row)==""){
+                    $printer -> feed(1);;
+                }else{
+                    if( $row[0] == " " && $row[ strlen( $row ) -1] == " "){//JUSTIFY_CENTER
+                        $printer->setJustification(Printer::JUSTIFY_CENTER);
+                    }else if( $row[0] != " " && $row[ strlen($row ) -1] == " "){//JUSTIFY_LEFT
+                        $printer->setJustification(Printer::JUSTIFY_LEFT);
+                    }else{//JUSTIFY_RIGHT
+                        $printer->setJustification(Printer::JUSTIFY_RIGHT);
+                    }
+                    $printer -> text($row."\n");    
+                }
+            }
+            $printer -> cut();
+
+            $printer -> close();
+            $data = ['status'  =>200,
+                 'message' => "Success",
+                 'data'    => []
+             ];
+
+            return $this->respond("Impresion Correcta", []);
+        } catch(Exception $e) {
+            return $this->respondInternalError("Impresion Correcta", $e);
+        }
+    }
+
+
+    public function imprimeticketip(Request $request){
+        $params = $request->all();
+		$datos = $params['ticket'];// $request->all();
+		$printerip = $params['ip'];
+		// echo 'IP: '.$datos['ip'];
+		// print_r( json_decode($datos, true) );
+		$datos = json_decode($datos, true);
+        try {
+            $connector = new NetworkPrintConnector($printerip, 9100);
+            $printer = new Printer($connector);
+            $count = count($datos);
+            for ($i=0; $i < $count; $i++) {
+                $row = $datos[$i];// json_decode( $datos[$i] );
+                if($row['text'] == "-1"){
+                    $printer -> feed(1);;
+                }else{
+                    if( $row['align'] == 0 ){//JUSTIFY_LEFT
+                        $printer->setJustification(Printer::JUSTIFY_LEFT);
+                    }else if( $row['align'] == 1){//JUSTIFY_CENTER
+                        $printer->setJustification(Printer::JUSTIFY_CENTER);
+                    }else{//JUSTIFY_RIGHT
+                        $printer->setJustification(Printer::JUSTIFY_RIGHT);
+                    }
+                    $printer -> text($row['text']."\n");    
+                }
+            }
+            $printer -> cut();
+            $printer -> close();
+            $data = ['status'  =>200,
+                 'message' => "Success",
+                 'data'    => []
+             ];
+
+            return $this->respond("Impresion Correcta", []);
+        } catch(Exception $e) {
+            return $this->respondInternalError("Impresion Correcta", $e);
+        }
+
+
+    }
 
 
      /**
